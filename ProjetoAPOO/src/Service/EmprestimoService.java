@@ -5,8 +5,9 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import util.Conexao;
 
@@ -39,6 +40,60 @@ public class EmprestimoService {
 		        System.out.println("❌ Erro ao fazer o empréstimo: " + e.getMessage());
 		    }
 		}
+	 
+	 public void registrarDevolucao(int idEmprestimo) {
+
+		    String sqlSelect = "SELECT data_devolucao_prevista FROM emprestimo WHERE id_emprestimo = ?";
+		    String sqlUpdate = "UPDATE emprestimo SET data_devolucao_real = ?, status_emprestimo = 'DEVOLVIDO' WHERE id_emprestimo = ?";
+		    String sqlInsertMulta = "INSERT INTO multa (valor, status_pagamento, data_geracao, fk_emprestimo, id_status) VALUES (?, 'PENDENTE', now(), ?, 1)";
+
+		    try (Connection conn = Conexao.getConnection()) {
+
+		        LocalDateTime dataDevolucaoReal = LocalDateTime.now();
+
+		        // Buscar data prevista
+		        PreparedStatement stmtSelect = conn.prepareStatement(sqlSelect);
+		        stmtSelect.setInt(1, idEmprestimo);
+		        var rs = stmtSelect.executeQuery();
+
+		        if (!rs.next()) {
+		            System.out.println("❌ Empréstimo não encontrado!");
+		            return;
+		        }
+
+		        LocalDateTime dataPrevista = rs.getTimestamp("data_devolucao_prevista").toLocalDateTime();
+
+		        long diasAtraso = 0;
+		        double valorMulta = 0.0;
+
+		        if (dataDevolucaoReal.isAfter(dataPrevista)) {
+		            diasAtraso = java.time.Duration.between(dataPrevista, dataDevolucaoReal).toDays();
+		            valorMulta = diasAtraso * 1.0; // R$ 2 por dia
+		        }
+
+		        // Atualiza empréstimo
+		        PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate);
+		        stmtUpdate.setTimestamp(1, Timestamp.valueOf(dataDevolucaoReal));
+		        stmtUpdate.setInt(2, idEmprestimo);
+		        stmtUpdate.executeUpdate();
+
+		        // Se tem multa, salva na tabela MULTA
+		        if (valorMulta > 0) {
+		            PreparedStatement stmtMulta = conn.prepareStatement(sqlInsertMulta);
+		            stmtMulta.setDouble(1, valorMulta);
+		            stmtMulta.setInt(2, idEmprestimo);
+		            stmtMulta.executeUpdate();
+
+		            System.out.println("⚠️ Multa criada: R$ " + valorMulta + " por " + diasAtraso + " dias de atraso.");
+		        }
+
+		        System.out.println("📚 Devolução registrada com sucesso!");
+
+		    } catch (SQLException e) {
+		        System.out.println("❌ Erro ao registrar devolução: " + e.getMessage());
+		    }
+		}
+
 
 }
 			

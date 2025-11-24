@@ -40,6 +40,7 @@ public class MenuAdmin {
             System.out.println("10 - Listar livros");
             System.out.println("11 - Excluir Livro");
             System.out.println("12 - Realizar Emprestimo");
+            System.out.println("13 - Registrar devolução");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
             opcao = sc.nextInt();
@@ -58,6 +59,7 @@ public class MenuAdmin {
                 case 10 -> livroService.listarLivro();
                 case 11 -> excluirLivro();
                 case 12 -> cadastrarEmprestimo();
+                case 13 -> registrarDevolução();
                 case 0 -> System.out.println("Saindo do Painel do Administrador...");
                 default -> System.out.println("Opção inválida!");
             }
@@ -198,7 +200,7 @@ public class MenuAdmin {
     	sc.nextLine();
     	System.out.println("informe o ID do Usuario:  ");
     	int id_usuario = sc.nextInt();
-    	sc.nextInt();
+    	sc.nextLine();
     	System.out.println("informe o ID do livro:  ");
     	int id_livro = sc.nextInt();
     	sc.nextLine();
@@ -207,5 +209,11 @@ public class MenuAdmin {
     	
     	emprestimoService.Emprestimo(id_funcionario, id_usuario, id_livro, status);
     }
-   
+    
+    private void registrarDevolução() {
+    	System.out.print("Informe o ID do empréstimo para devolver: ");
+    	int id = sc.nextInt();
+
+    	emprestimoService.registrarDevolucao(id);
+    }
 }
