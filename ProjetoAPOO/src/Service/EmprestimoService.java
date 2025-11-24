@@ -68,7 +68,7 @@ public class EmprestimoService {
 
 		        if (dataDevolucaoReal.isAfter(dataPrevista)) {
 		            diasAtraso = java.time.Duration.between(dataPrevista, dataDevolucaoReal).toDays();
-		            valorMulta = diasAtraso * 1.0; // R$ 2 por dia
+		            valorMulta = diasAtraso * 2.50; // R$ 2 por dia
 		        }
 
 		        // Atualiza empréstimo
