@@ -42,7 +42,8 @@ public class FuncionarioService {
     
 
     public boolean loginFuncionario(String CPF, String senha) {
-       
+        
+    	// O SQL está correto: busca o funcionário ativo (id_status = 1) com o CPF e senha fornecidos.
     	String sql = "SELECT cpf,senha_hash FROM funcionario WHERE cpf = ? and senha_hash = ? and id_status = 1 ";
     	
     	try (Connection conn = Conexao.getConnection();
@@ -53,13 +54,16 @@ public class FuncionarioService {
     	
     	ResultSet rs = stmt.executeQuery();
     	
-    	return true;
+    	// CORREÇÃO: Verifica se há pelo menos uma linha no resultado
+    	if (rs.next()) {
+    	    return true; // Credenciais encontradas
+    	}
     	
     	}catch (SQLException e) {
             System.out.println("❌ Erro ao fazer login funcionário: " + e.getMessage());
         }
     	
-    	return false;
+    	return false; // Se não encontrou ou houve exceção, retorna false
     	
     }
     	

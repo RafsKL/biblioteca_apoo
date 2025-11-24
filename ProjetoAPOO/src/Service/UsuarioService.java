@@ -146,4 +146,79 @@ public class UsuarioService {
             return false;
         }
     }
+    
+    
+         
+        public void consultarMultasPorCpf(String cpf) {
+            // SQL para buscar multas ativas (PENDENTES) de um usuário através do seu CPF
+            String sql = "SELECT m.valor, m.status_pagamento, e.data_emprestimo, l.titulo " +
+                         "FROM multa m " +
+                         "JOIN emprestimo e ON m.fk_emprestimo = e.id_emprestimo " +
+                         "JOIN usuario u ON e.fk_id_usuario = u.id_usuario " +
+                         "JOIN livro l ON e.fk_id_livro = l.id_livro " +
+                         "WHERE u.cpf = ? AND m.status_pagamento = 'PENDENTE'";
+
+            try (Connection conn = Conexao.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                // Você precisa obter o ID do usuário usando o CPF para usar em JOINs. 
+                // Porém, podemos usar o CPF diretamente se o JOIN for da tabela USUARIO.
+                // O código SQL acima está usando JOINs e assume que o USUARIO tem um id_usuario que se liga ao emprestimo.
+                // Se o CPF é único, você pode simplificar o JOIN como feito acima (join na tabela U)
+
+                stmt.setString(1, cpf);
+                ResultSet rs = stmt.executeQuery();
+
+                boolean encontrou = false;
+                while (rs.next()) {
+                    encontrou = true;
+                    System.out.println("----------------------------------------");
+                    System.out.println("Livro: " + rs.getString("titulo"));
+                    System.out.println("Valor da Multa: R$ " + String.format("%.2f", rs.getDouble("valor")));
+                    System.out.println("Status: " + rs.getString("status_pagamento"));
+                    System.out.println("Data Empréstimo: " + rs.getDate("data_emprestimo"));
+                }
+
+                if (!encontrou) {
+                    System.out.println("✅ Nenhuma multa pendente encontrada para este usuário.");
+                }
+
+            } catch (SQLException e) {
+                System.out.println("❌ Erro ao consultar multas: " + e.getMessage());
+            }
+        }
+        
+        public void listarEmprestimosAtivosPorCpf(String cpf) {
+            String sql = "SELECT e.data_emprestimo, e.data_devolucao_prevista, e.status_emprestimo, l.titulo, l.isbn " +
+                         "FROM emprestimo e " +
+                         "JOIN usuario u ON e.fk_id_usuario = u.id_usuario " +
+                         "JOIN livro l ON e.fk_id_livro = l.id_livro " +
+                         "WHERE u.cpf = ? AND e.status_emprestimo IN ('ATIVO', 'ATRASADO')";
+
+            try (Connection conn = Conexao.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, cpf);
+                ResultSet rs = stmt.executeQuery();
+
+                boolean encontrou = false;
+                while (rs.next()) {
+                    encontrou = true;
+                    System.out.println("----------------------------------------");
+                    System.out.println("Livro: " + rs.getString("titulo") + " (ISBN: " + rs.getString("isbn") + ")");
+                    System.out.println("Status: " + rs.getString("status_emprestimo"));
+                    System.out.println("Data Empréstimo: " + rs.getDate("data_emprestimo"));
+                    System.out.println("Devolução Prevista: " + rs.getDate("data_devolucao_prevista"));
+                }
+
+                if (!encontrou) {
+                    System.out.println("✅ Nenhuma empréstimo ativo encontrado para este usuário.");
+                }
+
+            } catch (SQLException e) {
+                System.out.println("❌ Erro ao listar empréstimos ativos: " + e.getMessage());
+            }
+        }
+    
+    
 }

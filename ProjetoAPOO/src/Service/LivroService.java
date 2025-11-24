@@ -103,9 +103,9 @@ public class LivroService {
 	 	        }
 		
 	}
-	public void pesquisarLivro(String titulo,String ISBN) {
+	public void pesquisarLivro(String titulo) {
 		//(titulo, autor, genero, edicao, sinopse,categoria, isbn, ano_publicado, quantidade_disponivel
-		String sql ="SELECT titulo,genero,edicao,sinopse FROM LIVRO WHERE id_status = 1 AND (titulo LIKE ? OR isbn =?) " ;
+		String sql ="SELECT titulo,genero,edicao,sinopse FROM LIVRO WHERE id_status = 1 AND titulo LIKE ?  " ;
 		
 		try (Connection conn = Conexao.getConnection();
 	             PreparedStatement stmt = conn.prepareStatement(sql)){
@@ -113,7 +113,7 @@ public class LivroService {
 			
 			
 			stmt.setString(1, "%"+titulo+"%");
-			stmt.setString(2, ISBN);
+			
 			
 			try (ResultSet rs = stmt.executeQuery()) {
 				

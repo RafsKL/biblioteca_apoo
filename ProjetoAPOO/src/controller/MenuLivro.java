@@ -48,7 +48,7 @@ public class MenuLivro {
     	System.out.println("digite o ISBN do livro: ");
     	String isbn = sc.nextLine();
     	
-    	livroService.pesquisarLivro(titulo, isbn);
+    	livroService.pesquisarLivro(titulo);
     }
 	
 }

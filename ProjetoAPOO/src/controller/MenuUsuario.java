@@ -18,37 +18,30 @@ public class MenuUsuario {
     // Guarda o CPF do usuário logado
     private String usuarioLogadoCpf;
 
-    public MenuUsuario(UsuarioService usuarioService, LivroService livroService) {
+    // CONSTRUTOR ATUALIZADO: Agora recebe o CPF do usuário que já fez login
+    public MenuUsuario(UsuarioService usuarioService, LivroService livroService, String usuarioLogadoCpf) {
         this.usuarioService = usuarioService;
         this.livroService = livroService;
+        this.usuarioLogadoCpf = usuarioLogadoCpf; // Armazena o CPF passado
     }
-
+    
+    // MÉTODO EXIBIR REMOVIDO/MUDADO, pois a autenticação já foi feita
     public void exibir() {
-        System.out.print("CPF: ");
-        String cpf = sc.nextLine();
-        System.out.print("Senha: ");
-        String senha = sc.nextLine();
-
-        if (usuarioService.login(cpf, senha)) {
-            usuarioLogadoCpf = cpf; // ✅ guarda o usuário logado
-            System.out.println("✅ Login realizado com sucesso!");
-            exibirMenu();
-        } else {
-            System.out.println("❌ CPF ou senha inválidos!");
-        }
+        // Redireciona diretamente para o menu, pois o login foi feito no MenuPrincipal
+        exibirMenu();
     }
+
 
     public void exibirMenu() {
         int opcao;
         do {
             System.out.println("\n--- Painel do Usuário ---");
+            System.out.println("Usuário logado: " + usuarioLogadoCpf); // Exibe quem está logado
             System.out.println("1 - Pesquisar por livro");
             System.out.println("2 - Consultar livros disponíveis");
             System.out.println("3 - Consultar multas");
-            System.out.println("4 - Fazer reserva de livro(s)");
-            System.out.println("5 - Verificar meus livros");
-            System.out.println("6 - Devolver livro");
-            System.out.println("7 - Ver meu perfil");
+            System.out.println("4 - Verificar meus livros");
+            System.out.println("5 - Ver meu perfil");
             System.out.println("0 - Sair");
             System.out.print("Escolha: ");
             opcao = sc.nextInt();
@@ -57,19 +50,47 @@ public class MenuUsuario {
             switch (opcao) {
                 case 1 -> pesquisarLivro();
                 case 2 -> listarLivro();
-                case 7 -> verPerfil();
-                case 0 -> System.out.println("Saindo do Painel do Usuário...");
+                case 3 -> consultarMultas();
+                case 4 -> verificarMeusLivros();
+                case 5 -> verPerfil();
+                case 0 -> {
+                    System.out.println("Saindo do Painel do Usuário...");
+                    usuarioLogadoCpf = null; // Limpa o usuário logado ao sair
+                }
                 default -> System.out.println("Opção inválida!");
             }
         } while (opcao != 0);
     }
 
+    
+//------------------- MULTAS ----------------------------------
+    
+    public void consultarMultas() {
+        if (usuarioLogadoCpf == null) {
+            System.out.println("Nenhum usuário logado!");
+            return;
+        }
+        System.out.println("\n--- Consultando Multas ---");
+        usuarioService.consultarMultasPorCpf(usuarioLogadoCpf);
+    }
+    
+    public void verificarMeusLivros() {
+        if (usuarioLogadoCpf == null) {
+            System.out.println("Nenhum usuário logado!");
+            return;
+        }
+        System.out.println("\n--- Meus Empréstimos Ativos ---");
+        usuarioService.listarEmprestimosAtivosPorCpf(usuarioLogadoCpf);
+    }
+    
+//--------------------LIVRO -------------------------------------
+    
+    
     public void pesquisarLivro() {
-        System.out.print("Digite o ISBN do livro: ");
-        String isbn = sc.nextLine();
+        
         System.out.print("Digite o título do livro: ");
         String titulo = sc.nextLine();
-        livroService.pesquisarLivro(titulo, isbn);
+        livroService.pesquisarLivro(titulo);
     }
 
     public void listarLivro() {
@@ -100,7 +121,7 @@ public class MenuUsuario {
         }
     }
 
-    // ✅ AGORA ESTE MÉTODO BUSCA OS DADOS DO USUÁRIO LOGADO
+    // O método verPerfil utiliza o 'usuarioLogadoCpf' que foi injetado no construtor
     public void verPerfil() {
         if (usuarioLogadoCpf == null) {
             System.out.println("Nenhum usuário logado!");

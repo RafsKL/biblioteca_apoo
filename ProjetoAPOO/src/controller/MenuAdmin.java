@@ -190,7 +190,7 @@ public class MenuAdmin {
     	livroService.excluirLivro(isbn);
     }
     
- // -------------------- Livro --------------------
+ // -------------------- Emprestimo --------------------
     
     private void cadastrarEmprestimo() {
     	System.out.println("------ Emprestimo -------");
